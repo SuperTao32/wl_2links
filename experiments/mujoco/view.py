@@ -4,8 +4,7 @@ import math
 import mujoco
 import mujoco.viewer
 
-# model = mujoco.MjModel.from_xml_path("assets/xml/wheel_leg_model.xml")
-model = mujoco.MjModel.from_xml_path("assets/xml/wheel_leg_car.xml")
+model = mujoco.MjModel.from_xml_path("assets/wheel_leg_car_2links/wheel_leg_car_2link.xml")
 data = mujoco.MjData(model)
 
 with mujoco.viewer.launch_passive(model, data) as viewer:
