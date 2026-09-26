@@ -1,0 +1,368 @@
+<?xml version="1.0"?>
+<robot name="wheel_leg_car_2links">
+
+    <material name="base_red">
+        <color rgba="0.85 0.25 0.18 1" />
+    </material>
+    <material name="upper_blue">
+        <color rgba="0.25 0.45 0.85 1" />
+    </material>
+    <material name="lower_green">
+        <color rgba="0.25 0.75 0.55 1" />
+    </material>
+    <material name="knee_yellow">
+        <color rgba="0.95 0.75 0.15 1" />
+    </material>
+    <material name="wheel_black">
+        <color rgba="0.08 0.08 0.08 1" />
+    </material>
+    <material name="imu_yellow">
+        <color rgba="1 1 0 1" />
+    </material>
+
+    <!-- ==================== 车身 ==================== -->
+    <link name="base_link">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <mass value="4.0" />
+            <inertia ixx="0.0389333333" ixy="0" ixz="0"
+                     iyy="0.0693333333" iyz="0"
+                     izz="0.0986666667" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.44 0.32 0.12" />
+            </geometry>
+            <material name="base_red" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.44 0.32 0.12" />
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="imu_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.012" />
+            </geometry>
+            <material name="imu_yellow" />
+        </visual>
+    </link>
+
+    <joint name="imu_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="imu_link" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+
+    <!-- ==================== 左腿 ==================== -->
+    <link name="left_upper_leg_link">
+        <inertial>
+            <origin xyz="0 0 -0.085" rpy="0 0 0" />
+            <mass value="0.22" />
+            <!-- MuJoCo capsule 的解析惯量 -->
+            <inertia ixx="0.0007728358" ixy="0" ixz="0"
+                     iyy="0.0007728358" iyz="0"
+                     izz="0.0000564114" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 -0.085" rpy="0 0 0" />
+            <geometry>
+                <!-- URDF 没有标准 capsule，使用圆柱和两端球体组合 -->
+                <cylinder radius="0.023" length="0.17" />
+            </geometry>
+            <material name="upper_blue" />
+        </visual>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.023" />
+            </geometry>
+            <material name="upper_blue" />
+        </visual>
+        <visual>
+            <origin xyz="0 0 -0.17" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.023" />
+            </geometry>
+            <material name="upper_blue" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 -0.085" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.023" length="0.17" />
+            </geometry>
+        </collision>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.023" />
+            </geometry>
+        </collision>
+        <collision>
+            <origin xyz="0 0 -0.17" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.023" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="left_hip" type="revolute">
+        <parent link="base_link" />
+        <child link="left_upper_leg_link" />
+        <origin xyz="0 0.18 0" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit lower="-1.58" upper="1.58"
+               effort="20" velocity="10" />
+        <dynamics damping="1.0" friction="0" />
+    </joint>
+
+    <link name="left_lower_leg_link">
+        <inertial>
+            <!-- 小腿圆柱和膝关节球的组合质心及组合惯量 -->
+            <origin xyz="0 0 -0.0748" rpy="0 0 0" />
+            <mass value="0.25" />
+            <inertia ixx="0.0009758638" ixy="0" ixz="0"
+                     iyy="0.0009758638" iyz="0"
+                     izz="0.0000686994" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.032" />
+            </geometry>
+            <material name="knee_yellow" />
+        </visual>
+        <visual>
+            <origin xyz="0 0 -0.085" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.023" length="0.17" />
+            </geometry>
+            <material name="lower_green" />
+        </visual>
+        <visual>
+            <origin xyz="0 0 -0.17" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.023" />
+            </geometry>
+            <material name="lower_green" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.032" />
+            </geometry>
+        </collision>
+        <collision>
+            <origin xyz="0 0 -0.085" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.023" length="0.17" />
+            </geometry>
+        </collision>
+        <collision>
+            <origin xyz="0 0 -0.17" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.023" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="left_knee" type="revolute">
+        <parent link="left_upper_leg_link" />
+        <child link="left_lower_leg_link" />
+        <origin xyz="0 0 -0.17" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit lower="-2.6179938" upper="0.0"
+               effort="15" velocity="10" />
+        <dynamics damping="0.8" friction="0" />
+    </joint>
+
+    <link name="left_wheel_link">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <mass value="0.50" />
+            <inertia ixx="0.0009041667" ixy="0" ixz="0"
+                     iyy="0.0016" iyz="0"
+                     izz="0.0009041667" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="1.5707963268 0 0" />
+            <geometry>
+                <cylinder radius="0.08" length="0.05" />
+            </geometry>
+            <material name="wheel_black" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="1.5707963268 0 0" />
+            <geometry>
+                <cylinder radius="0.08" length="0.05" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="left_wheel_joint" type="continuous">
+        <parent link="left_lower_leg_link" />
+        <child link="left_wheel_link" />
+        <origin xyz="0 0 -0.17" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit effort="5" velocity="30" />
+        <dynamics damping="0.05" friction="0" />
+    </joint>
+
+    <!-- ==================== 右腿 ==================== -->
+    <link name="right_upper_leg_link">
+        <inertial>
+            <origin xyz="0 0 -0.085" rpy="0 0 0" />
+            <mass value="0.22" />
+            <inertia ixx="0.0007728358" ixy="0" ixz="0"
+                     iyy="0.0007728358" iyz="0"
+                     izz="0.0000564114" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 -0.085" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.023" length="0.17" />
+            </geometry>
+            <material name="upper_blue" />
+        </visual>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.023" />
+            </geometry>
+            <material name="upper_blue" />
+        </visual>
+        <visual>
+            <origin xyz="0 0 -0.17" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.023" />
+            </geometry>
+            <material name="upper_blue" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 -0.085" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.023" length="0.17" />
+            </geometry>
+        </collision>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.023" />
+            </geometry>
+        </collision>
+        <collision>
+            <origin xyz="0 0 -0.17" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.023" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="right_hip" type="revolute">
+        <parent link="base_link" />
+        <child link="right_upper_leg_link" />
+        <origin xyz="0 -0.18 0" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit lower="-1.58" upper="1.58"
+               effort="20" velocity="10" />
+        <dynamics damping="1.0" friction="0" />
+    </joint>
+
+    <link name="right_lower_leg_link">
+        <inertial>
+            <origin xyz="0 0 -0.0748" rpy="0 0 0" />
+            <mass value="0.25" />
+            <inertia ixx="0.0009758638" ixy="0" ixz="0"
+                     iyy="0.0009758638" iyz="0"
+                     izz="0.0000686994" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.032" />
+            </geometry>
+            <material name="knee_yellow" />
+        </visual>
+        <visual>
+            <origin xyz="0 0 -0.085" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.023" length="0.17" />
+            </geometry>
+            <material name="lower_green" />
+        </visual>
+        <visual>
+            <origin xyz="0 0 -0.17" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.023" />
+            </geometry>
+            <material name="lower_green" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.032" />
+            </geometry>
+        </collision>
+        <collision>
+            <origin xyz="0 0 -0.085" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.023" length="0.17" />
+            </geometry>
+        </collision>
+        <collision>
+            <origin xyz="0 0 -0.17" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.023" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="right_knee" type="revolute">
+        <parent link="right_upper_leg_link" />
+        <child link="right_lower_leg_link" />
+        <origin xyz="0 0 -0.17" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit lower="-2.6179938" upper="0.0"
+               effort="15" velocity="10" />
+        <dynamics damping="0.8" friction="0" />
+    </joint>
+
+    <link name="right_wheel_link">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <mass value="0.50" />
+            <inertia ixx="0.0009041667" ixy="0" ixz="0"
+                     iyy="0.0016" iyz="0"
+                     izz="0.0009041667" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="1.5707963268 0 0" />
+            <geometry>
+                <cylinder radius="0.08" length="0.05" />
+            </geometry>
+            <material name="wheel_black" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="1.5707963268 0 0" />
+            <geometry>
+                <cylinder radius="0.08" length="0.05" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="right_wheel_joint" type="continuous">
+        <parent link="right_lower_leg_link" />
+        <child link="right_wheel_link" />
+        <origin xyz="0 0 -0.17" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit effort="5" velocity="30" />
+        <dynamics damping="0.05" friction="0" />
+    </joint>
+
+</robot>

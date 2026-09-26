@@ -1,0 +1,164 @@
+<mujoco model="wheel_leg_car_2link">
+
+    <compiler angle="degree" autolimits="true" />
+
+    <option timestep="0.002" integrator="RK4" gravity="0 0 -9.81">
+        <flag contact="enable" />
+    </option>
+
+    <default>
+        <joint damping="0.2" armature="0.01" />
+        <geom condim="3" friction="1.0 0.01 0.001" />
+
+        <!-- 髋关节：大腿相对车身转动 -->
+        <default class="hip">
+            <joint type="hinge" axis="0 1 0" limited="true"
+                   range="-60 60" damping="1.0" armature="0.02" />
+        </default>
+
+        <!-- 膝关节：小腿相对大腿转动 -->
+        <default class="knee">
+            <joint type="hinge" axis="0 1 0" limited="true"
+                   range="-120 30" damping="0.8" armature="0.015" />
+        </default>
+
+        <default class="leg_link">
+            <geom type="capsule" size="0.023"
+                  rgba="0.25 0.45 0.85 1" />
+        </default>
+
+        <default class="wheel">
+            <joint type="hinge" axis="0 1 0" limited="false"
+                   damping="0.05" armature="0.01" />
+            <!-- cylinder 的 size 分别为：轮子半径、轮子半宽 -->
+            <geom type="cylinder" size="0.08 0.025" euler="90 0 0"
+                  rgba="0.08 0.08 0.08 1"
+                  friction="1.2 0.005 0.0001" />
+        </default>
+    </default>
+
+    <asset>
+        <texture name="ground_tex" type="2d" builtin="checker"
+                 rgb1="0.15 0.15 0.15" rgb2="0.85 0.85 0.85"
+                 width="512" height="512" />
+        <material name="ground_mat" texture="ground_tex"
+                  texrepeat="4 4" texuniform="true" reflectance="0.05" />
+    </asset>
+
+    <worldbody>
+        <light name="top_light" pos="0 0 3" dir="0 0 -1" />
+
+        <geom name="ground" type="plane" size="5 5 0.1"
+              material="ground_mat" friction="1.2 0.01 0.001" />
+
+        <body name="base" pos="0 0 0.42">
+            <freejoint name="base_free" />
+
+            <geom name="base_geom" type="box" size="0.22 0.16 0.06"
+                  mass="4.0" rgba="0.85 0.25 0.18 1" />
+
+            <site name="imu" pos="0 0 0" size="0.012"
+                  rgba="1 1 0 1" />
+
+            <camera name="follow" mode="trackcom"
+                    pos="-1.2 -1.2 0.8"
+                    xyaxes="0.707 -0.707 0 0.408 0.408 0.816" />
+
+            <!-- ==================== 左腿 ==================== -->
+            <!-- 第一个 link：左大腿，直接通过髋关节连接车身 -->
+            <body name="left_upper_leg" pos="0 0.18 0">
+                <joint name="left_hip" class="hip" />
+                <geom name="left_upper_leg_geom" class="leg_link"
+                      fromto="0 0 0 0 0 -0.17"
+                      mass="0.22" rgba="0.25 0.45 0.85 1" />
+
+                <!-- 第二个 link：左小腿，通过膝关节连接大腿 -->
+                <body name="left_lower_leg" pos="0 0 -0.17">
+                    <joint name="left_knee" class="knee" />
+
+                    <!-- 膝关节位置标记 -->
+                    <geom name="left_knee_geom" type="sphere" size="0.032"
+                          mass="0.03" rgba="0.95 0.75 0.15 1" />
+
+                    <geom name="left_lower_leg_geom" class="leg_link"
+                          fromto="0 0 0 0 0 -0.17"
+                          mass="0.22" rgba="0.25 0.75 0.55 1" />
+
+                    <!-- 左轮安装在小腿末端 -->
+                    <body name="left_wheel" pos="0 0 -0.17">
+                        <joint name="left_wheel_joint" class="wheel" />
+                        <geom name="left_wheel_geom" class="wheel" mass="0.50" />
+                    </body>
+                </body>
+            </body>
+
+            <!-- ==================== 右腿 ==================== -->
+            <!-- 第一个 link：右大腿，直接通过髋关节连接车身 -->
+            <body name="right_upper_leg" pos="0 -0.18 0">
+                <joint name="right_hip" class="hip" />
+                <geom name="right_upper_leg_geom" class="leg_link"
+                      fromto="0 0 0 0 0 -0.17"
+                      mass="0.22" rgba="0.25 0.45 0.85 1" />
+
+                <!-- 第二个 link：右小腿，通过膝关节连接大腿 -->
+                <body name="right_lower_leg" pos="0 0 -0.17">
+                    <joint name="right_knee" class="knee" />
+
+                    <!-- 膝关节位置标记 -->
+                    <geom name="right_knee_geom" type="sphere" size="0.032"
+                          mass="0.03" rgba="0.95 0.75 0.15 1" />
+
+                    <geom name="right_lower_leg_geom" class="leg_link"
+                          fromto="0 0 0 0 0 -0.17"
+                          mass="0.22" rgba="0.25 0.75 0.55 1" />
+
+                    <!-- 右轮安装在小腿末端 -->
+                    <body name="right_wheel" pos="0 0 -0.17">
+                        <joint name="right_wheel_joint" class="wheel" />
+                        <geom name="right_wheel_geom" class="wheel" mass="0.50" />
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+
+    <actuator>
+        <!-- 左腿：髋、膝、轮毂 -->
+        <motor name="left_hip_motor" joint="left_hip"
+               gear="20" ctrllimited="true" ctrlrange="-1 1" />
+        <motor name="left_knee_motor" joint="left_knee"
+               gear="15" ctrllimited="true" ctrlrange="-1 1" />
+        <motor name="left_wheel_motor" joint="left_wheel_joint"
+               gear="5" ctrllimited="true" ctrlrange="-1 1" />
+
+        <!-- 右腿：髋、膝、轮毂 -->
+        <motor name="right_hip_motor" joint="right_hip"
+               gear="20" ctrllimited="true" ctrlrange="-1 1" />
+        <motor name="right_knee_motor" joint="right_knee"
+               gear="15" ctrllimited="true" ctrlrange="-1 1" />
+        <motor name="right_wheel_motor" joint="right_wheel_joint"
+               gear="5" ctrllimited="true" ctrlrange="-1 1" />
+    </actuator>
+
+    <sensor>
+        <!-- 关节角度 -->
+        <jointpos name="left_hip_pos" joint="left_hip" />
+        <jointpos name="left_knee_pos" joint="left_knee" />
+        <jointpos name="right_hip_pos" joint="right_hip" />
+        <jointpos name="right_knee_pos" joint="right_knee" />
+
+        <!-- 关节速度 -->
+        <jointvel name="left_hip_vel" joint="left_hip" />
+        <jointvel name="left_knee_vel" joint="left_knee" />
+        <jointvel name="left_wheel_vel" joint="left_wheel_joint" />
+        <jointvel name="right_hip_vel" joint="right_hip" />
+        <jointvel name="right_knee_vel" joint="right_knee" />
+        <jointvel name="right_wheel_vel" joint="right_wheel_joint" />
+
+        <!-- 车身姿态与 IMU -->
+        <framequat name="base_quat" objtype="body" objname="base" />
+        <gyro name="base_gyro" site="imu" />
+        <accelerometer name="base_acc" site="imu" />
+    </sensor>
+
+</mujoco>
